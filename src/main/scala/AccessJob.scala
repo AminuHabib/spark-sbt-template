@@ -14,11 +14,11 @@ case class AccessLog(
   userAgent: String,
   unk: String)
 
-object DstiJob {
+object AccessJob {
 
   def run(spark: SparkSession): String = {
-    val path = "src/resources/access.log.gz"
-    val outputPath = "myjsonreport"
+    val path = "src/data/access.log.gz"
+    val outputPath = "results"
 
     createReport(spark: SparkSession, path: String, outputPath: String)
     return "successful"
@@ -56,24 +56,24 @@ object DstiJob {
 
     //dsWithTime.printSchema
     dsWithTime.cache
-    dsWithTime.createOrReplaceTempView("AccessLog")
+    dsWithTime.createOrReplaceTempView("AccessLogTable")
 
     //  "==== (BEGIN) Compute the list of number of access per IP address for each IP address ==="
     spark
       .sql(
-        "select cast(datetime as date) as date, map(ip, count(*)) as countByIpAdresses from AccessLog where cast(datetime as date) in (select date from (select count(*) as count, cast(datetime as date) as date from AccessLog group by date having count(*) > 20000 )) group by date, ip")
+        "select cast(datetime as date) as date, map(ip, count(*)) as IpAddressCount from AccessLogTable where cast(datetime as date) in (select date from (select count(*) as count, cast(datetime as date) as date from AccessLogTable group by date having count(*) > 20000 )) group by date, ip")
       .coalesce(1)
       .write
       .mode("Overwrite")
-      .json(s"$outputPath/numberOfAccessByIP")
+      .json(s"$outputPath/AccessCountByIP")
 
     // "==== (BEGIN) Compute the list of number of access by URI for each URI ==="
     spark
       .sql(
-        "select cast(datetime as date) as date, map(split(request,\" \")[1], count(*)) as countByUri from AccessLog where cast(datetime as date) in (select date from (select count(*) as count, cast(datetime as date) as date from AccessLog group by date having count(*) > 20000 )) group by date, split(request,\" \")[1]")
+        "select cast(datetime as date) as date, map(split(request,\" \")[1], count(*)) as uriCount from AccessLogTable where cast(datetime as date) in (select date from (select count(*) as count, cast(datetime as date) as date from AccessLogTable group by date having count(*) > 20000 )) group by date, split(request,\" \")[1]")
       .coalesce(1)
       .write
       .mode("Overwrite")
-      .json(s"$outputPath/numberOfAccessByUri")
+      .json(s"$outputPath/AccessCountByUri")
   }
 }

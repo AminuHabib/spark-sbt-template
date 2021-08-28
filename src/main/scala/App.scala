@@ -1,16 +1,16 @@
 import org.apache.spark.sql.SparkSession
 
-object LogAnalyzer {
+object App {
 
   def main(args: Array[String]): Unit = {
 
     val spark = SparkSession
       .builder()
-      .appName("Log Analyzer")
+      .appName("AccessLog Analyzer")
       .config("spark.master", "local")
       .getOrCreate()
 
-    val result = DstiJob.run(spark)
+    val result = AccessJob.run(spark)
     spark.stop
 
     println(s"result of job is : $result")
