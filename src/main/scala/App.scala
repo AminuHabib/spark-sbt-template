@@ -1,10 +1,15 @@
 import org.apache.spark.sql.SparkSession
 
-object App {
+object LogAnalyzer {
 
-  def main(args: Array[String]) = {
+  def main(args: Array[String]): Unit = {
 
-    val spark = SparkSession.builder.appName("Simple Application").getOrCreate()
+    val spark = SparkSession
+      .builder()
+      .appName("Log Analyzer")
+      .config("spark.master", "local")
+      .getOrCreate()
+
     val result = DstiJob.run(spark)
     spark.stop
 
