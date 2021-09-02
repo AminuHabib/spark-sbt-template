@@ -13,7 +13,7 @@ object App {
     val result = AccessJob.run(spark)
     spark.stop
 
-    println(s"result of job is : $result")
+    println(s"The result of the job is : $result")
 
   }
 }

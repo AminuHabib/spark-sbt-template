@@ -54,11 +54,9 @@ object AccessJob {
       "datetime",
       to_timestamp(ds("datetime"), "dd/MMM/yyyy:HH:mm:ss X"))
 
-    
     dsWithTime.cache
     dsWithTime.createOrReplaceTempView("AccessLogTable")
 
-    
     spark
       .sql(
         "select cast(datetime as date) as date, map(ip, count(*)) as IpAddressCount from AccessLogTable where cast(datetime as date) in (select date from (select count(*) as count, cast(datetime as date) as date from AccessLogTable group by date having count(*) > 20000 )) group by date, ip")
@@ -67,7 +65,6 @@ object AccessJob {
       .mode("Overwrite")
       .json(s"$outputPath/AccessCountByIP")
 
-    
     spark
       .sql(
         "select cast(datetime as date) as date, map(split(request,\" \")[1], count(*)) as uriCount from AccessLogTable where cast(datetime as date) in (select date from (select count(*) as count, cast(datetime as date) as date from AccessLogTable group by date having count(*) > 20000 )) group by date, split(request,\" \")[1]")
